@@ -10,9 +10,9 @@ const sslOptions = {
     cert: fs.readFileSync(env.sslCertPath),
 };
 
-const server = app.listen(env.port, () => {
-  console.log(`Server listening on port ${env.port}`);
-});
+const server = https.createServer(sslOptions, app).listen(env.port, () => {
+    console.log(`Server listening on port ${env.port}`)
+    });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
