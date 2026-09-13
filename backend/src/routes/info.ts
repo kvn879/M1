@@ -21,9 +21,9 @@ router.get('/server-ip', (_req: Request, res: Response) => {
 
 router.get("/server-time", (_req: Request, res: Response) => {
     const now = new Date()
-    const hr = String(now.getUTCHours()).padStart(2, '0'))
-    const min = String(now.getUTCHours().padStart(2, '0'))
-    const sec = String(now.getUTCHours().padStart(2, '0'))
+    const hr = String(now.getUTCHours()).padStart(2, '0')
+    const min = String(now.getUTCHours()).padStart(2, '0')
+    const sec = String(now.getUTCHours()).padStart(2, '0')
 
     res.json({time: `${hr}:${min}:${sec} GMT`})
     }
