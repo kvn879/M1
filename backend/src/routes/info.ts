@@ -7,9 +7,8 @@ router.get('/server-ip', (_req: Request, res: Response) => {
     const interfaces = os.networkInterfaces
     let ipAddress = ''
 
-    for (const name of Object.keys(interfaces)) {
-        for (const net of interfaces[name]) {
-
+    for (const [, addresses] of Object.entries(interfaces)) {
+        for (const net of addresses) {
             if (!net.internal && net.family === 'IPv4') {
                 ipAddress = net.address
                 }
