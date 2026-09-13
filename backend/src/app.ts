@@ -1,5 +1,6 @@
 import express, { type Express } from 'express';
 import info from './routes/info'
+import cors from 'cors';
 
 export function createApp(): Express {
   const app = express();
