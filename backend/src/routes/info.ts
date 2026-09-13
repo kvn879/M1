@@ -26,11 +26,10 @@ router.get("/server-time", (_req: Request, res: Response) => {
     const sec = String(now.getUTCHours()).padStart(2, '0')
 
     res.json({time: `${hr}:${min}:${sec} GMT`})
-    }
+    })
 
 router.get('/name', (_req: Request, res: Response) => {
     res.json({firstname: 'Place', lastname: 'Holder'})
     })
-)
 
 export default router;
