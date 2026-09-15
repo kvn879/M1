@@ -35,7 +35,7 @@ android {
         buildConfigField(
             "String",
             "API_BASE_URL",
-            "\"${localProperty("API_BASE_URL", "http://10.0.2.2:3000")}\""
+            "\"${localProperty("API_BASE_URL", "https:34.105.116.91:3000//")}\""
         )
         buildConfigField(
             "String",
@@ -82,6 +82,10 @@ dependencies {
     implementation("androidx.credentials:credentials:1.6.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.2.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

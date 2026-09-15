@@ -5,7 +5,7 @@ const router = Router()
 
 router.get('/server-ip', (_req: Request, res: Response) => {
     const interfaces = os.networkInterfaces
-    let ipAddress = ''
+    let ipAddress = 'Unknown'
 
     for (const [, addresses] of Object.entries(interfaces)) {
         for (const net of addresses) {
@@ -15,16 +15,19 @@ router.get('/server-ip', (_req: Request, res: Response) => {
             }
         }
 
-    res.json({ipAddress})
+    res.json({ip: ipAddress})
     })
 
 router.get("/server-time", (_req: Request, res: Response) => {
     const now = new Date()
-    const hr = String(now.getUTCHours()).padStart(2, '0')
-    const min = String(now.getUTCHours()).padStart(2, '0')
-    const sec = String(now.getUTCHours()).padStart(2, '0')
+    const timeStr = now.toUTCString().split(' ')[4]
+    const offsetMinutes = now.getTimezoneOffset();
+    const absOffset = Math.abs(offsetMinutes);
+    const offsetHours = Math.floor(absOffset / 60);
+    const offsetMins = absOffset % 60;
+    const sign = offsetMinutes <= 0 ? "+" : "-";
 
-    res.json({time: `${hr}:${min}:${sec} GMT`})
+    res.json({time: `${timeStr} GMT${sign}${String(offsetHours).padStart(2, '0')}:${String(offsetMins).padStart(2, '0')}`
     })
 
 router.get('/name', (_req: Request, res: Response) => {
