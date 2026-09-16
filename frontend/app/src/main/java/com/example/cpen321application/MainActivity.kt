@@ -257,8 +257,8 @@ fun handleSignIn(result: GetCredentialResponse) {
 fun getClientIp(): String {
     try {
         val interfaces = NetworkInterface.getNetworkInterfaces()
-        Log.d("IP_DEBUG", "Interface: ${networkInterface.name}, isLoopback: ${networkInterface.isLoopback}, isUp: ${networkInterface.isUp}")
         for (netInterface in interfaces) {
+            Log.d("IP_DEBUG", "Interface: ${netInterface.name}, isLoopback: ${netInterface.isLoopback}, isUp: ${netInterface.isUp}")
             if (netInterface.isLoopback || netInterface.isUp ) continue
             for (address in netInterface.inetAddresses) {
                 if (address is Inet4Address) {
