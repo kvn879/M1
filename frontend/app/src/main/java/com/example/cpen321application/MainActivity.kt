@@ -220,6 +220,8 @@ suspend fun googleSignIn(context: Context): String { //check if right context wa
         val response = credentialManager.getCredential(request = request, context = context)
         val credential = response.credential
 
+        Log.d("GOOGLE_DEBUG", "Credential type: ${credential.type}")
+
         if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
             val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
             return "${googleIdTokenCredential.givenName} ${googleIdTokenCredential.familyName}"
@@ -230,28 +232,6 @@ suspend fun googleSignIn(context: Context): String { //check if right context wa
     }
 
     return "unknown"
-}
-
-fun handleSignIn(result: GetCredentialResponse) {
-    val credential = result.credential
-    if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL){
-        try {
-            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-
-            val idToken = googleIdTokenCredential.idToken
-            val displayName = googleIdTokenCredential.displayName
-            val givenName = googleIdTokenCredential.givenName
-            val familyName = googleIdTokenCredential.familyName
-            val email = googleIdTokenCredential.email
-
-        } catch (e: GoogleIdTokenParsingException) {
-            Log.e("CredentialManagerException", "Sign in failed", e)
-        }
-
-    } else {
-        Log.e("CredentialManagerException", "Sign in failed")
-    }
-
 }
 
 fun getClientIp(): String {
