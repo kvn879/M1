@@ -5,18 +5,18 @@ const router = Router()
 
 router.get('/server-ip', (_req: Request, res: Response) => {
     const interfaces = os.networkInterfaces
-    let ipAddress = 'Unknown'
+    let ip = 'Unknown'
 
     for (const [, addresses] of Object.entries(interfaces)) {
         for (const net of addresses) {
             if (!net.internal && net.family === 'IPv4') {
-                ipAddress = net.address
+                ip = net.address
                 }
             }
         }
 
-    res.json({ip: ipAddress})
-    })
+    res.json({ip: ip})
+})
 
 router.get("/server-time", (_req: Request, res: Response) => {
     const now = new Date()
@@ -31,7 +31,7 @@ router.get("/server-time", (_req: Request, res: Response) => {
     })
 
 router.get('/name', (_req: Request, res: Response) => {
-    res.json({firstname: 'Place', lastname: 'Holder'})
+    res.json({firstName: 'Place', lastName: 'Holder'})
     })
-
+})
 export default router;
