@@ -33,6 +33,7 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -45,6 +46,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.awaitResponse
 import java.net.NetworkInterface
 import java.net.Inet4Address
+
 
 class MainActivity : ComponentActivity() {
     private lateinit var apiService: ApiService
@@ -91,7 +93,7 @@ fun Greeting(apiBaseUrl: String, modifier: Modifier = Modifier, apiService: ApiS
                 isLoading = true
                 errorMsg = null
                 try {
-                    val googleName = googleSignIn(context)
+                    val googleName = googleSignIn(context) ?: return@launch
 
                     val clientIp = getClientIp()
                     val clientTime = getClientTime()
@@ -227,8 +229,10 @@ suspend fun googleSignIn(context: Context): String { //check if right context wa
             return "${googleIdTokenCredential.givenName} ${googleIdTokenCredential.familyName}"
         }
 
+    } catch (e: GetCredentialCancellationException) {
+        Log.i("CredentialManagerException", "User Cancelled Sign-In", e)
     } catch (e: GetCredentialException) {
-        Log.e("CredentialManagerException", "Sign in failed", e)
+        Log.e("CredentialManagerException", "Sign-In Failed", e)
     }
 
     return "unknown"
