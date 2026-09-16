@@ -2,7 +2,6 @@ package com.example.cpen321application
 
 import android.os.Bundle
 import android.content.Context
-import android.net.wifi.WifiManager
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -46,6 +45,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.awaitResponse
 import java.net.NetworkInterface
 import java.net.Inet4Address
+import android.net.ConnectivityManager
 
 
 class MainActivity : ComponentActivity() {
@@ -95,7 +95,7 @@ fun Greeting(apiBaseUrl: String, modifier: Modifier = Modifier, apiService: ApiS
                 try {
                     val googleName = googleSignIn(context) ?: return@launch
 
-                    val clientIp = getClientIp()
+                    val clientIp = getClientIp(context)
                     val clientTime = getClientTime()
 
                     val nameResponse = apiService.getName().awaitResponse()
@@ -238,21 +238,18 @@ suspend fun googleSignIn(context: Context): String { //check if right context wa
     return "unknown"
 }
 
-fun getClientIp(): String {
-    try {
-        val interfaces = NetworkInterface.getNetworkInterfaces()
-        for (netInterface in interfaces) {
-            Log.d("IP_DEBUG", "Interface: ${netInterface.name}, isLoopback: ${netInterface.isLoopback}, isUp: ${netInterface.isUp}")
-            if (netInterface.isLoopback || netInterface.isUp ) continue
-            for (address in netInterface.inetAddresses) {
-                if (address is Inet4Address) {
-                    return address.hostAddress ?: "Unknown"
-                }
-            }
+fun getClientIp(context: Context): String {
+    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val activeNetwork = cm.activeNetwork ?: return "Unknown"
+    val linkProperties = cm.getLinkProperties(activeNetwork) ?: return "Unknown"
+
+    for (linkAddress in linkProperties.linkAddresses) {
+        val address = linkAddress.address
+        if (address is Inet4Address && !address.isLoopbackAddress) {
+            return address.hostAddress ?: "Unknown"
         }
-    } catch (e: Exception) {
-            return "unknown"
-        }
+
+    }
     return "unknown"
 }
 

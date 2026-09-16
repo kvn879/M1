@@ -4,7 +4,8 @@ import os from 'os';
 const router = Router()
 
 router.get('/server-ip', (_req: Request, res: Response) => {
-    const interfaces = os.networkInterfaces()
+    res.json({ip: process.env.SERVER_PUBLIC_IP }} 'unknown')
+    /* const interfaces = os.networkInterfaces()
     let ip = 'Unknown'
 
     for (const [, addresses] of Object.entries(interfaces)) {
@@ -15,7 +16,7 @@ router.get('/server-ip', (_req: Request, res: Response) => {
             }
         }
 
-    res.json({ip: ip})
+    res.json({ip: ip})*/
 })
 
 router.get("/server-time", (_req: Request, res: Response) => {
