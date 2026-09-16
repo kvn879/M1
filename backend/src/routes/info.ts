@@ -28,7 +28,7 @@ router.get("/server-time", (_req: Request, res: Response) => {
  })
 
 router.get('/name', (_req: Request, res: Response) => {
-    res.json({firstName: 'Place', lastName: 'Holder'})
+    res.json({firstName: 'Kevin', lastName: 'Zhu'})
 })
 
 
