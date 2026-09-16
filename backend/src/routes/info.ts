@@ -4,11 +4,11 @@ import os from 'os';
 const router = Router()
 
 router.get('/server-ip', (_req: Request, res: Response) => {
-    const interfaces = os.networkInterfaces
+    const interfaces = os.networkInterfaces()
     let ip = 'Unknown'
 
     for (const [, addresses] of Object.entries(interfaces)) {
-        for (const net of addresses) {
+        for (const net of addresses || []) {
             if (!net.internal && net.family === 'IPv4') {
                 ip = net.address
                 }
@@ -20,18 +20,16 @@ router.get('/server-ip', (_req: Request, res: Response) => {
 
 router.get("/server-time", (_req: Request, res: Response) => {
     const now = new Date()
-    const timeStr = now.toUTCString().split(' ')[4]
-    const offsetMinutes = now.getTimezoneOffset();
-    const absOffset = Math.abs(offsetMinutes);
-    const offsetHours = Math.floor(absOffset / 60);
-    const offsetMins = absOffset % 60;
-    const sign = offsetMinutes <= 0 ? "+" : "-";
+    const hr = String(now.getUTCHours()).padStart(2, '0')
+    const min = String(now.getUTCMinutes()).padStart(2, '0')
+    const sec = String(now.getUTCSeconds()).padStart(2, '0')
 
-    res.json({time: `${timeStr} GMT${sign}${String(offsetHours).padStart(2, '0')}:${String(offsetMins).padStart(2, '0')}`
-    })
+    res.json({time: `${hr}:${min}:${sec} GMT+00:00`})
+ })
 
 router.get('/name', (_req: Request, res: Response) => {
     res.json({firstName: 'Place', lastName: 'Holder'})
-    })
 })
+
+
 export default router;
