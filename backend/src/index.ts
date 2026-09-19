@@ -12,9 +12,7 @@ const sslOptions = {
     cert: fs.readFileSync(env.sslCertPath),
 };
 
-const server = https.createServer(sslOptions, app).listen(env.port, () => {
-    console.log(`Server listening on port ${env.port}`)
-    });
+const server = https.createServer(sslOptions, app)
 
 const io = new SocketIOServer(server, {
     cors: {origin: '*'}
