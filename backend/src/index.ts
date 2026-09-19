@@ -2,7 +2,7 @@ import { createApp } from './app';
 import { env } from './config/env';
 import fs from 'fs';
 import https from 'https';
-import { startPixelRelay } from '../src/PixelRelay';
+import { startPixelRelay } from '../src/pixelRelay';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 
 const app = createApp();
