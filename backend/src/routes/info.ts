@@ -4,7 +4,7 @@ import os from 'os';
 const router = Router()
 
 router.get('/server-ip', (_req: Request, res: Response) => {
-    res.json({ip: process.env.SERVER_PUBLIC_IP }} 'unknown')
+    res.json({ip: process.env.SERVER_PUBLIC_IP || 'unknown'})
     /* const interfaces = os.networkInterfaces()
     let ip = 'Unknown'
 
