@@ -5,46 +5,32 @@ import { env } from '../config/env';
 
 const router = Router()
 
-router.get('/server-ip', async (req: Request, res: Response) => {
+router.get('/server-ip', async (_req: Request, res: Response) => {
     let serverIp = env.serverPublicIp;
 
-    // Try Google Metadata Server first
     if (serverIp === 'unknown') {
         try {
             const response = await axios.get(
-                'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip',
-                {
-                    headers: { 'Metadata-Flavor': 'Google' },
-                    timeout: 1000,
-                }
+              'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip',
+              {
+                headers: { 'Metadata-Flavor': 'Google' },
+                timeout: 1000,
+                type: 'text',
+              }
             );
             serverIp = response.data;
-        } catch (e) {
-            // Not on Google Cloud or metadata unreachable
-        }
+          } catch (error) {
+            // Silently fail metadata check
+          }
     }
 
-    // Try ipify as a backup (user requested)
-    if (serverIp === 'unknown') {
-        try {
-            const response = await axios.get('https://api.ipify.org', { timeout: 2000 });
-            serverIp = response.data;
-        } catch (e) {
-            // All lookups failed
-        }
-    }
-
-    // Capture Client IP
-    let clientIp = req.ip || 'unknown';
-    if (clientIp.startsWith('::ffff:')) {
-        clientIp = clientIp.substring(7);
-    }
+    const clientIp = _req.ip || 'unknown';
 
     res.json({
         ip: serverIp,
         clientIp: clientIp
     });
-});
+})
 
 router.get("/server-time", (_req: Request, res: Response) => {
     const now = new Date()

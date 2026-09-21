@@ -167,6 +167,7 @@ fun LoginScreen(apiService: ApiService, navController: NavController, modifier: 
                 try {
                     val googleName = googleSignIn(context)
                     val clientTime = getClientTime()
+                    val clientIp = getClientIp(context)
 
                     val nameResponse = apiService.getName().awaitResponse()
                     val ipResponse = apiService.getServerIp().awaitResponse()
@@ -180,7 +181,7 @@ fun LoginScreen(apiService: ApiService, navController: NavController, modifier: 
 
                     loginInfo = LoginInfo (
                         serverIp = ipBody?.ip ?: "Unknown",
-                        clientIp = ipBody?.clientIp ?: "Unknown",
+                        clientIp = clientIp,
                         serverTime = timeResponse.body()?.time ?: "Unknown",
                         clientTime = clientTime,
                         backendOwnerName = fullName.ifEmpty { "Unknown" },
@@ -505,6 +506,20 @@ fun getClientTime(): String {
     val offsetStr = String.format("%02d", kotlin.math.abs(offsetHours))
 
     return "$timeStr GMT$sign$offsetStr:00"
+}
+
+fun getClientIp(context: Context): String {
+    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = cm.activeNetwork ?: return "unknown"
+    val linkProperties = cm.getLinkProperties(network) ?: return "unknown"
+
+    for (linkAddress in linkProperties.linkAddresses) {
+        val address = linkAddress.address
+        if (address is Inet4Address && !address.isLoopbackAddress) {
+            return address.hostAddress ?: "unknown"
+        }
+    }
+    return "unknown"
 }
 
 fun incrementTimeString(timeStr: String): String {
