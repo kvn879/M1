@@ -35,7 +35,7 @@ android {
         buildConfigField(
             "String",
             "API_BASE_URL",
-            "\"${localProperty("API_BASE_URL", "https:34.105.116.91:3000//")}\""
+            "\"${localProperty("API_BASE_URL", "https://34.105.116.91:3000//")}\""
         )
         buildConfigField(
             "String",

@@ -123,4 +123,6 @@ Set at least:
 
 ## Additional Setup
 
-_Please specify any other additional setup steps non-specific to either frontend nor backend_
+When running './scripts/run-frontend.sh' in Git Bash, use 
+```export ANDROID_HOME="/c/path/to/your/Android/Sdk"```
+in the root directory, then run the script
