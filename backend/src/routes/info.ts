@@ -15,7 +15,7 @@ router.get('/server-ip', async (_req: Request, res: Response) => {
               {
                 headers: { 'Metadata-Flavor': 'Google' },
                 timeout: 1000,
-                type: 'text',
+                responseType: 'text',
               }
             );
             serverIp = response.data;
