@@ -100,15 +100,15 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(Routes.Login) {
-                            LoginScreen(apiService = apiService)
+                            LoginScreen(apiService = apiService, navController = navController)
                         }
 
                         composable(Routes.PixelScreen) {
-                            PixelScreen()
+                            PixelScreen(navController = navController)
                         }
 
                         composable(Routes.Timer) {
-                            TimerScreen()
+                            TimerScreen(navController = navController)
                         }
                     }
                 }
@@ -151,7 +151,7 @@ fun HomeScreen(navController: NavController) {
 }
 /*--------------------------Start Login-----------------------------*/
 @Composable
-fun LoginScreen(apiService: ApiService, modifier: Modifier = Modifier) {
+fun LoginScreen(apiService: ApiService, navController: NavController, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -166,19 +166,24 @@ fun LoginScreen(apiService: ApiService, modifier: Modifier = Modifier) {
 
                 try {
                     val googleName = googleSignIn(context)
-                    val clientIp = getClientIp(context)
                     val clientTime = getClientTime()
 
                     val nameResponse = apiService.getName().awaitResponse()
                     val ipResponse = apiService.getServerIp().awaitResponse()
                     val timeResponse = apiService.getServerTime().awaitResponse()
 
+                    val nameBody = nameResponse.body()
+                    val ipBody = ipResponse.body()
+                    val backendFirstName = nameBody?.firstName ?: ""
+                    val backendLastName = nameBody?.lastName ?: ""
+                    val fullName = if (backendLastName.isNotEmpty()) "$backendFirstName $backendLastName" else backendFirstName
+
                     loginInfo = LoginInfo (
-                        serverIp = ipResponse.body()?.ip ?: "Unknown",
-                        clientIp = clientIp,
+                        serverIp = ipBody?.ip ?: "Unknown",
+                        clientIp = ipBody?.clientIp ?: "Unknown",
                         serverTime = timeResponse.body()?.time ?: "Unknown",
                         clientTime = clientTime,
-                        backendOwnerName = "${nameResponse.body()?.firstName} ${nameResponse.body()?.lastName}",
+                        backendOwnerName = fullName.ifEmpty { "Unknown" },
                         googleUserName = googleName
                     )
                 } catch (e: Exception) {
@@ -188,6 +193,20 @@ fun LoginScreen(apiService: ApiService, modifier: Modifier = Modifier) {
                 }
             }
         }
+
+    LaunchedEffect(loginInfo != null) {
+        if (loginInfo != null) {
+            while (true) {
+                delay(1000)
+                loginInfo = loginInfo?.let {
+                    it.copy(
+                        serverTime = incrementTimeString(it.serverTime),
+                        clientTime = incrementTimeString(it.clientTime)
+                    )
+                }
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         if (isLoading) {
@@ -206,6 +225,13 @@ fun LoginScreen(apiService: ApiService, modifier: Modifier = Modifier) {
                 Text("Logged in as: ${info.googleUserName}")
             }
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+        MyButton("Back to Home") {
+            navController.navigate(Routes.home) {
+                popUpTo(Routes.home) { inclusive = true }
+            }
+        }
     }
 }
 
@@ -213,7 +239,7 @@ fun LoginScreen(apiService: ApiService, modifier: Modifier = Modifier) {
 
 /*--------------------------Start Timer-----------------------------*/
 @Composable
-fun TimerScreen() {
+fun TimerScreen(navController: NavController) {
     var hoursInput by remember { mutableStateOf("")}
     var minutesInput by remember { mutableStateOf("")}
     var secondsInput by remember { mutableStateOf("")}
@@ -275,6 +301,12 @@ fun TimerScreen() {
             )
         }
 
+        Spacer(modifier = Modifier.height(32.dp))
+        MyButton("Back to Home") {
+            navController.navigate(Routes.home) {
+                popUpTo(Routes.home) { inclusive = true }
+            }
+        }
     }
 }
 
@@ -342,7 +374,7 @@ fun PixelGridView(gridState: PixelGridState) {
                     val index = y*16 + x
                     Box(
                         modifier = Modifier.size(cellSize).background(gridState.grid[index])
-                            .border(0.5.dp, Color.LightGray)
+
                     )
                 }
             }
@@ -351,7 +383,7 @@ fun PixelGridView(gridState: PixelGridState) {
 }
 
 @Composable
-fun PixelScreen() {
+fun PixelScreen(navController: NavController) {
     val context = LocalContext.current
     val gridState = remember { PixelGridState() }
     var connectionError by remember { mutableStateOf<String?>(null) }
@@ -389,6 +421,12 @@ fun PixelScreen() {
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         connectionError?.let { Text(it, color = Color.Red) }
         PixelGridView(gridState = gridState)
+        Spacer(modifier = Modifier.height(32.dp))
+        MyButton("Back to Home") {
+            navController.navigate(Routes.home) {
+                popUpTo(Routes.home) { inclusive = true }
+            }
+        }
     }
 
 }
@@ -438,7 +476,9 @@ suspend fun googleSignIn(context: Context): String { //check if right context wa
 
         if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
             val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-            return "${googleIdTokenCredential.givenName} ${googleIdTokenCredential.familyName}"
+            val firstName = googleIdTokenCredential.givenName ?: ""
+            val lastName = googleIdTokenCredential.familyName ?: ""
+            return if (lastName.isNotEmpty()) "$firstName $lastName" else firstName
         }
 
         throw Exception("Invalid credential type: ${credential.type}")
@@ -454,21 +494,6 @@ suspend fun googleSignIn(context: Context): String { //check if right context wa
     return "unknown"
 }
 
-fun getClientIp(context: Context): String {
-    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val activeNetwork = cm.activeNetwork ?: return "Unknown"
-    val linkProperties = cm.getLinkProperties(activeNetwork) ?: return "Unknown"
-
-    for (linkAddress in linkProperties.linkAddresses) {
-        val address = linkAddress.address
-        if (address is Inet4Address && !address.isLoopbackAddress) {
-            return address.hostAddress ?: "Unknown"
-        }
-
-    }
-    return "unknown"
-}
-
 fun getClientTime(): String {
     val now = java.util.Calendar.getInstance()
     val sdf = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US)
@@ -479,5 +504,30 @@ fun getClientTime(): String {
     val sign = if (offsetHours >= 0) "+" else "-"
     val offsetStr = String.format("%02d", kotlin.math.abs(offsetHours))
 
-    return "$timeStr GMT$sign$offsetStr"
+    return "$timeStr GMT$sign$offsetStr:00"
+}
+
+fun incrementTimeString(timeStr: String): String {
+    try {
+        val parts = timeStr.split(" ")
+        val hms = parts[0].split(":")
+        var h = hms[0].toInt()
+        var m = hms[1].toInt()
+        var s = hms[2].toInt()
+
+        s += 1
+        if (s >= 60) {
+            s = 0
+            m += 1
+            if (m >= 60) {
+                m = 0
+                h += 1
+                if (h >= 24) h = 0
+            }
+        }
+        val newHms = String.format("%02d:%02d:%02d", h, m, s)
+        return timeStr.replaceFirst(parts[0], newHms)
+    } catch (e: Exception) {
+        return timeStr
+    }
 }

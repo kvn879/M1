@@ -16,6 +16,6 @@ interface ApiService {
 
 }
 
-data class ServerIpResponse(val ip: String)
+data class ServerIpResponse(val ip: String, val clientIp: String)
 data class ServerTimeResponse(val time: String)
 data class NameResponse(val firstName: String, val lastName: String)

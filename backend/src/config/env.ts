@@ -15,4 +15,5 @@ export const env = {
   port,
   sslKeyPath: process.env.SSL_KEY_PATH || path.join(__dirname, '../../certs/key.pem'),
   sslCertPath: process.env.SSL_CERT_PATH || path.join(__dirname, '../../certs/cert.pem'),
+  serverPublicIp: process.env.SERVER_PUBLIC_IP || 'unknown',
 } as const;

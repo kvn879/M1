@@ -1,22 +1,34 @@
 import {Router, type Request, type Response} from 'express';
 import os from 'os';
+import axios from 'axios';
+import { env } from '../config/env';
 
 const router = Router()
 
-router.get('/server-ip', (_req: Request, res: Response) => {
-    res.json({ip: process.env.SERVER_PUBLIC_IP || 'unknown'})
-    /* const interfaces = os.networkInterfaces()
-    let ip = 'Unknown'
+router.get('/server-ip', async (_req: Request, res: Response) => {
+    let serverIp = env.serverPublicIp;
 
-    for (const [, addresses] of Object.entries(interfaces)) {
-        for (const net of addresses || []) {
-            if (!net.internal && net.family === 'IPv4') {
-                ip = net.address
-                }
-            }
-        }
+    if (serverIp === 'unknown') {
+        try {
+            const response = await axios.get(
+              'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip',
+              {
+                headers: { 'Metadata-Flavor': 'Google' },
+                timeout: 1000,
+              }
+            );
+            serverIp = response.data;
+          } catch (error) {
+            // Silently fail metadata check
+          }
+    }
 
-    res.json({ip: ip})*/
+    const clientIp = _req.ip || 'unknown';
+
+    res.json({
+        ip: serverIp,
+        clientIp: clientIp
+    });
 })
 
 router.get("/server-time", (_req: Request, res: Response) => {
